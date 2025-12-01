@@ -32,7 +32,7 @@ void load_discharging_data(const std::string discharging_filename, std::vector<d
     std::vector<double> C_rates = {discharging_data[0][0]};
     std::vector<double> C_rates_start_index = {0};
     std::vector<double> C_rates_end_index;
-    for(int i = 1; i < discharging_data.size(); i++){
+    for(int i = 1; i < (int)discharging_data.size(); i++){
         if ( discharging_data[i-1][0] != discharging_data[i][0]){
             C_rates.push_back(discharging_data[i][0]);
             C_rates_start_index.push_back(i);
@@ -45,7 +45,7 @@ void load_discharging_data(const std::string discharging_filename, std::vector<d
     std::vector<double> V;
     std::vector<double> E;
 
-    for(int i = 0; i < C_rates.size(); i++){
+    for(int i = 0; i < (int)C_rates.size(); i++){
 
         I.push_back(C_rates[i] * nominal_capacity * P * -1);
         V.push_back(discharging_data[C_rates_start_index[i]][2] * S);
@@ -60,36 +60,15 @@ void load_discharging_data(const std::string discharging_filename, std::vector<d
 
     double max_content = *std::max_element(E.begin(), E.end());
 
-    for( int i = 0; i < C_rates.size(); i++){
+    for( int i = 0; i < (int)C_rates.size(); i++){
         a_1.push_back(max_content - *std::max_element(&E[C_rates_start_index[i]], &E[C_rates_end_index[i]]));
         a_1_I.push_back( C_rates[i] * nominal_capacity * P * -1);
     }
-/*
-    for(int i = 0; i < E.size(); i++ ){
-        E[i] = max_content - E[i];
-    }
-*/
-    for(int i = 0; i < C_rates.size(); i++){
+    
+		for(int i = 0; i < (int)C_rates.size(); i++){
         a_2.push_back(*std::max_element(&E[C_rates_start_index[i]], &E[C_rates_end_index[i]]));
         a_2_I.push_back( C_rates[i] * nominal_capacity * P * -1);
-    }
-/*
-    for(int i = 0; i < (a_1.size() / 2); i++){
-        double temp = a_1[i];
-        a_1[i] = a_1[a_1.size() - i - 1];
-        a_1[a_1.size() - i - 1] = temp;
-        temp = a_1_I[i];
-        a_1_I[i] = a_1_I[a_1_I.size() - i - 1];
-        a_1_I[a_1_I.size() - i - 1] = temp;
-        temp = a_2[i];
-        a_2[i] = a_2[a_2.size() - i - 1];
-        a_2[a_2.size() - i - 1] = temp;
-        temp = a_2_I[i];
-        a_2_I[i] = a_2_I[a_2_I.size() - i - 1];
-        a_2_I[a_2_I.size() - i - 1] = temp;
-    }
-*/
-
+		}
     all_currents.insert(all_currents.end(), I.begin(), I.end());
     all_vs.insert(all_vs.end(), V.begin(), V.end());
     all_bks.insert(all_bks.end(), E.begin(), E.end());
@@ -132,7 +111,7 @@ void exportcurveToCSV(const std::string& filename, std::vector<double> x, std::v
   std::cout << "En-tête écrit, calcul des points..." << std::endl;
   
   // Itération sur la grille
-  for (int i = 0; i < x.size(); ++i) {
+  for (int i = 0; i < (int)x.size(); ++i) {
     // Écriture de la ligne: x,y,z
     file << std::fixed << std::setprecision(6) 
          << x[i] << "," << y[i] << std::endl;
