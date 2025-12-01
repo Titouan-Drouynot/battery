@@ -44,12 +44,12 @@ bool Battery::canupdate(double P, double dt){
 }
 
 void Battery::update(double P, double dt){
-  std::cout << "recherche des solutions\n";
+  //std::cout << "recherche des solutions\n";
   std::vector<double> inter = this->intersect(P,dt);
-  std::cout << inter.size() << " solutions trouvées\n";
+  //std::cout << inter.size() << " solutions trouvées\n";
   double bestDiff = std::numeric_limits<double>::infinity();
   if( inter.size()==0){
-    std::cout << "puissance non autorisée\n";
+    std::cerr << "puissance non autorisée P : " << P << ", b : " << this->b << std::endl;
     return;
   }
   int bestIndex=-1;

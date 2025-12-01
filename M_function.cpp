@@ -12,42 +12,44 @@ surface s_init(std::vector<double> &all_currents, std::vector<double> &all_bks, 
   return m;
 }
 
-double interpolate(double x, double y,const surface& m){
-  // Vérifier que la triangulation n'est pas vide
-  if (m.dt.number_of_vertices() < 3) {
-    std::cerr << "Erreur: triangulation insuffisante" << std::endl;
-    return 0.0;
-  }
+static inline void barycentric_coords(
+    const Point& A, const Point& B, const Point& C,
+    const Point& P,
+    double &u, double &v, double &w)
+{
+    double x = P.x(), y = P.y();
+    double x1 = A.x(), y1 = A.y();
+    double x2 = B.x(), y2 = B.y();
+    double x3 = C.x(), y3 = C.y();
 
-  Point query(x, y);
+    double detT = (y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3);
 
-  // Vérifier si le point est dans la triangulation
-  // Chercher la face contenant le point
-  typename Delaunay::Face_handle face = m.dt.locate(query);
+    u = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / detT;
+    v = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / detT;
+    w = 1.0 - u - v;
+}
 
-  // Si locate retourne nullptr ou si on est en dehors
-  if (m.dt.is_infinite(face)) {
-    //std::cerr << "Point (" << x << ", " << y << ") hors de la triangulation" << std::endl;
-    return 0.0;
-  }
+double interpolate(double x, double y, const surface& m) {
+    Point query(x, y);
+    auto fh = m.dt.locate(query);
 
-  std::vector<std::pair<Point, double>> coords;
-  double norm = CGAL::natural_neighbor_coordinates_2(
-    m.dt, query, std::back_inserter(coords)).second;
+    if (m.dt.is_infinite(fh)) return 0.0;
 
-  // Vérifier la validité de la normalisation
-  if (norm <= 0.0 || coords.empty()) {
-    std::cerr << "Coordonnées naturelles invalides pour (" << x << ", " << y << ")" << std::endl;
-    std::cerr << "Norm: " << norm << ", Nb coords: " << coords.size() << std::endl;
-    return 0.0;
-  }
+    // Les 3 sommets
+    const Point& p0 = fh->vertex(0)->point();
+    const Point& p1 = fh->vertex(1)->point();
+    const Point& p2 = fh->vertex(2)->point();
 
-  //std::cout << "Interpolation en (" << x << ", " << y << ") avec " << coords.size() << " voisins, norm=" << norm << std::endl;
+    // Valeurs
+    double f0 = m.function_values.at(p0);
+    double f1 = m.function_values.at(p1);
+    double f2 = m.function_values.at(p2);
 
-  return CGAL::linear_interpolation(
-    coords.begin(), coords.end(), norm,
-    CGAL::Data_access<std::map<Point, double>>(m.function_values));
+    // Coordonnées barycentriques
+    double l0, l1, l2;
+    barycentric_coords(p0, p1, p2, query, l0, l1, l2);
 
+    return l0*f0 + l1*f1 + l2*f2;
 }
 
 
@@ -123,5 +125,3 @@ void exportSurfaceToCSV(const std::string& filename,
   std::cout << "Surface exportée dans " << filename << " avec succès!" << std::endl;
   std::cout << "Points générés: " << count << std::endl;
 }
-
-

@@ -13,7 +13,6 @@ class Battery{
     double Ric;
     double a1(double I);
     double a2(double I);
-    surface M;
     // pour calcul de a1 et a2 précalcul en certains I
     std::vector<double> I1;
     std::vector<double> I2;
@@ -28,4 +27,5 @@ class Battery{
     double b;
     double U;
     double I;
+    surface M;
 };
