@@ -6,10 +6,6 @@ Battery::Battery(double vmin,double vmax, double rid, double nominal_capacity,do
   this->M = M_init(discharging_filename, nominal_capacity, this->Rid, this->A1, this->I1, this->A2, this->I2, series, para);
 	this->ac = 0;
 	this->ad = I1[0];
-	std::cout<<"ac : "<<ac<<", ad : "<<ad<<", Vmin : "<< Vmin << ", Vmax : " << Vmax << ", R : " << Rid << ",b : "<< b << std::endl;
-	exportSurfaceToCSV("/home/mig/M.csv", -125, 0, 50, 0, 230, 50, this->M);  
-	exportcurveToCSV("/home/mig/a1.csv", this->I1, this->A1);
-	exportcurveToCSV("/home/mig/a2.csv", this->I2, this->A2);
   this->I = 0;
   this->U = this->Vmax;
 }  
